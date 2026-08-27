@@ -1,0 +1,5 @@
+# Neovim plugin — no build artifacts needed
+*.swp
+*.swo
+*~
+tags
