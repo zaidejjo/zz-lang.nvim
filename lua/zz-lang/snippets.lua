@@ -67,7 +67,7 @@ M.snippets = {
     body = "for ${1:i} in 0..${2:n} {\n\t${0}\n}",
     description = "For loop over range",
   },
-  while = {
+  ["while"] = {
     trigger = "while",
     body = "while ${1:condition} {\n\t${0}\n}",
     description = "While loop",

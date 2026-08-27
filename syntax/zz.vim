@@ -33,6 +33,14 @@ syn keyword zzType int float bool str
 " Generic type constructors (Option<T>, Result<T, E>)
 syn keyword zzTypeBuiltin Option Result
 
+" ── Built-in functions ────────────────────────────────────────────────────
+
+" Top-level builtins (no import required)
+syn keyword zzBuiltin print println input
+      \ len map filter enumerate zip range
+      \ typeof str int float
+      \ assert panic
+
 " ── Operators ─────────────────────────────────────────────────────────────
 
 " Arithmetic
@@ -71,7 +79,8 @@ syn region zzString
       \ contains=zzInterp,zzEscape
       \ oneline
 
-" String interpolation: {expr} inside strings
+" String interpolation: {expr} inside strings — highlight the braces
+" and all contained expression syntax (keywords, operators, identifiers).
 syn region zzInterp
       \ matchgroup=zzInterpBrace start=/{/ end=/}/
       \ contains=TOP
@@ -85,6 +94,12 @@ syn match zzEscape /\\[ntr\\"]/ contained
 " Float must come before int to match first
 syn match zzFloat /\d\+\.\d\+/
 syn match zzInt /\d\+\(_\d\+\)*/
+
+" ── Function calls (highlight the name) ──────────────────────────────────
+
+" Match function-call identifiers: word followed by `(`.
+" This covers both user-defined and stdlib calls like `math.pow(2, 3)`.
+syn match zzFuncCall /\w\+\ze\s*(/
 
 " ── Variant constructors ─────────────────────────────────────────────────
 
@@ -114,6 +129,7 @@ hi def link zzKeyword        Keyword
 hi def link zzBoolean        Boolean
 hi def link zzType           Type
 hi def link zzTypeBuiltin    Type
+hi def link zzBuiltin        Function
 hi def link zzOperator       Operator
 hi def link zzDelimiter      Delimiter
 hi def link zzString         String
@@ -126,6 +142,7 @@ hi def link zzVariant        Constant
 hi def link zzPipe           Operator
 hi def link zzFuncDef        Keyword
 hi def link zzFuncName       Function
+hi def link zzFuncCall       Function
 hi def link zzStructDef      Keyword
 hi def link zzStructName     Type
 
