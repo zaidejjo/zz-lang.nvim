@@ -10,9 +10,9 @@ endif
 
 " ── Comments ──────────────────────────────────────────────────────────────
 
-" Line comments: // and #
-syn match zzComment "//.*$" contains=@Spell
-syn match zzComment "#.*$" contains=@Spell
+" Line comments: // and # (defined after operators so they win)
+syn match zzComment "//.*" contains=@Spell
+syn match zzComment "#.*" contains=@Spell
 
 " Block comments: /* ... */ (nestable)
 syn region zzComment start="/\*" end="\*/" contains=zzComment fold
@@ -27,7 +27,7 @@ syn keyword zzBoolean true false
 
 " ── Types ─────────────────────────────────────────────────────────────────
 
-" Primitive types
+" Primitive types (must come BEFORE builtins to take priority)
 syn keyword zzType int float bool str
 
 " Generic type constructors (Option<T>, Result<T, E>)
@@ -35,17 +35,18 @@ syn keyword zzTypeBuiltin Option Result
 
 " ── Built-in functions ────────────────────────────────────────────────────
 
-" Top-level builtins (no import required)
+" Top-level builtins (no import required) - NO type names here!
 syn keyword zzBuiltin print println input
       \ len map filter enumerate zip range
-      \ typeof str int float
+      \ typeof
       \ assert panic
 
 " ── Operators ─────────────────────────────────────────────────────────────
 
-" Arithmetic
+" Arithmetic (split / to avoid matching // comments)
 syn match zzOperator /\*\*/
-syn match zzOperator /[+\-*/%]/
+syn match zzOperator /[+\-*%]/
+syn match zzOperator /\/\@!/
 
 " Comparison
 syn match zzOperator /[!=]=/
@@ -55,7 +56,7 @@ syn match zzOperator /[<>]=\?/
 syn match zzOperator /&&\|||/
 syn match zzOperator /!/
 
-" Special operators
+" Special operators (order matters: longer first)
 syn match zzOperator /??/
 syn match zzOperator /:=/
 syn match zzOperator /=/
@@ -73,38 +74,20 @@ syn match zzDelimiter /[[\]]/
 
 " ── Strings ───────────────────────────────────────────────────────────────
 
-" String with interpolation support
-syn region zzString
-      \ start=/"/ end=/"/
-      \ contains=zzInterp,zzEscape
-      \ oneline
-
-" String interpolation: {expr} inside strings — highlight the braces
-" and all contained expression syntax (keywords, operators, identifiers).
-syn region zzInterp
-      \ matchgroup=zzInterpBrace start=/{/ end=/}/
-      \ contains=TOP
-      \ contained
-
-" Escape sequences
+" Escape sequences (must be defined before strings so they're contained)
 syn match zzEscape /\\[ntr\\"]/ contained
+
+" String with interpolation support
+syn region zzString start=/"/ end=/"/ oneline contains=zzEscape,zzInterp
+
+" String interpolation: {expr} inside strings
+syn region zzInterp matchgroup=zzInterpBrace start=/{/ end=/}/ contains=@Spell,zzKeyword,zzBoolean,zzType,zzBuiltin,zzOperator,zzInt,zzFloat,zzString,zzEscape contained
 
 " ── Numbers ───────────────────────────────────────────────────────────────
 
 " Float must come before int to match first
 syn match zzFloat /\d\+\.\d\+/
 syn match zzInt /\d\+\(_\d\+\)*/
-
-" ── Function calls (highlight the name) ──────────────────────────────────
-
-" Match function-call identifiers: word followed by `(`.
-" This covers both user-defined and stdlib calls like `math.pow(2, 3)`.
-syn match zzFuncCall /\w\+\ze\s*(/
-
-" ── Variant constructors ─────────────────────────────────────────────────
-
-" .ok, .err, .some, .none, .customVariant etc.
-syn match zzVariant /\.\w\+/
 
 " ── Function definitions ─────────────────────────────────────────────────
 
@@ -118,6 +101,14 @@ syn match zzFuncName /\w\+\%(\.\w\+\)*/ contained
 
 syn keyword zzStructDef struct nextgroup=zzStructName skipwhite
 syn match zzStructName /\w\+\%(\.\w\+\)*/ contained
+
+" ── Type annotation (name: type = value) ─────────────────────────────────
+" Match `ident:` pattern for explicit type annotations.
+syn match zzTypeAnnot /\w\+\ze\s*:\s*\w/ containedin=ALLBUT,zzString,zzComment
+
+" ── Variant constructors ─────────────────────────────────────────────────
+" DEFINED LAST to take priority over operators (e.g., .ok vs .. range)
+syn match zzVariant /\.\w\+/
 
 " ── Pipeline highlight ───────────────────────────────────────────────────
 
@@ -142,8 +133,8 @@ hi def link zzVariant        Constant
 hi def link zzPipe           Operator
 hi def link zzFuncDef        Keyword
 hi def link zzFuncName       Function
-hi def link zzFuncCall       Function
 hi def link zzStructDef      Keyword
 hi def link zzStructName     Type
+hi def link zzTypeAnnot      Special
 
 let b:current_syntax = "zz"

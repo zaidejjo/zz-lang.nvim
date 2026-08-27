@@ -36,6 +36,53 @@ M.snippets = {
     description = "Struct declaration",
   },
 
+  -- ── Explicit type declarations (name: type = value) ──────────────────────
+  decl = {
+    trigger = "decl",
+    body = "${1:name}: ${2:type} = ${3:value}",
+    description = "Explicit type declaration (name: type = value)",
+  },
+  declint = {
+    trigger = "declint",
+    body = "${1:name}: int = ${2:0}",
+    description = "Explicit int declaration",
+  },
+  declstr = {
+    trigger = "declstr",
+    body = '${1:name}: str = "${2:value}"',
+    description = "Explicit str declaration",
+  },
+  declfloat = {
+    trigger = "declfloat",
+    body = "${1:name}: float = ${2:0.0}",
+    description = "Explicit float declaration",
+  },
+  declbool = {
+    trigger = "declbool",
+    body = "${1:name}: bool = ${2:true}",
+    description = "Explicit bool declaration",
+  },
+  declopt = {
+    trigger = "declopt",
+    body = "${1:name}: Option<${2:type}> = ${3:.none}",
+    description = "Explicit Option declaration",
+  },
+  declres = {
+    trigger = "declres",
+    body = "${1:name}: Result<${2:T}, ${3:E}> = ${4:.ok(0)}",
+    description = "Explicit Result declaration",
+  },
+  declarr = {
+    trigger = "declarr",
+    body = "${1:name}: [${2:type}] = [${3}]",
+    description = "Explicit array declaration",
+  },
+  decldict = {
+    trigger = "decldict",
+    body = "${1:name}: {${2:str}: ${3:int}} = {${4}}",
+    description = "Explicit dict declaration",
+  },
+
   -- ── Control flow ───────────────────────────────────────────────────────
   ["if"] = {
     trigger = "if",
@@ -284,6 +331,58 @@ M.snippets = {
     trigger = "lcf",
     body = "[${1:expr} for ${2:x} in ${3:iter} if ${4:cond}]",
     description = "List comprehension with filter",
+  },
+
+  -- ── Option/Result patterns ───────────────────────────────────────────────
+  optsome = {
+    trigger = "optsome",
+    body = "${1:name}: Option<${2:type}> = .some(${3:value})",
+    description = "Option with some value",
+  },
+  optnone = {
+    trigger = "optnone",
+    body = "${1:name}: Option<${2:type}> = .none",
+    description = "Option with none",
+  },
+  optmatch = {
+    trigger = "optmatch",
+    body = "match ${1:opt} {\n\t.some(${2:v}) => ${3},\n\t.none => ${0},\n}",
+    description = "Match on Option",
+  },
+  resok = {
+    trigger = "resok",
+    body = "${1:name}: Result<${2:T}, ${3:E}> = .ok(${4:value})",
+    description = "Result with ok value",
+  },
+  reserr = {
+    trigger = "reserr",
+    body = "${1:name}: Result<${2:T}, ${3:E}> = .err(${4:error})",
+    description = "Result with error",
+  },
+  resmatch = {
+    trigger = "resmatch",
+    body = "match ${1:res} {\n\t.ok(${2:v}) => ${3},\n\t.err(${4:e}) => ${0},\n}",
+    description = "Match on Result",
+  },
+  optmap = {
+    trigger = "optmap",
+    body = "${1:opt} |> map(|${2:x}| ${3})",
+    description = "Map over Option",
+  },
+  resmap = {
+    trigger = "resmap",
+    body = "${1:res} |> map(|${2:v}| ${3})",
+    description = "Map over Result",
+  },
+  optandthen = {
+    trigger = "optand",
+    body = "${1:opt} |> and_then(|${2:x}| ${3})",
+    description = "Chain Option with and_then",
+  },
+  resandthen = {
+    trigger = "resand",
+    body = "${1:res} |> and_then(|${2:v}| ${3})",
+    description = "Chain Result with and_then",
   },
 }
 
