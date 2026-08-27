@@ -31,9 +31,7 @@ syn keyword zzBoolean true false
 syn keyword zzType int float bool str
 
 " Generic type constructors (Option<T>, Result<T, E>)
-syn match zzTypeGeneric /\v<%(Option|Result)>/ nextgroup=zzTypeAngle
-syn match zzTypeAngle /</ nextgroup=zzType contained
-syn match zzTypeAngle />/ contained
+syn keyword zzTypeBuiltin Option Result
 
 " ── Operators ─────────────────────────────────────────────────────────────
 
@@ -51,9 +49,8 @@ syn match zzOperator /!/
 
 " Special operators
 syn match zzOperator /??/
-syn match zzOperator /?/
 syn match zzOperator /:=/
-syn match zzOperator /[=]/
+syn match zzOperator /=/
 syn match zzOperator /->/
 syn match zzOperator /=>/
 syn match zzOperator /\.\./
@@ -94,17 +91,18 @@ syn match zzInt /\d\+\(_\d\+\)*/
 " .ok, .err, .some, .none, .customVariant etc.
 syn match zzVariant /\.\w\+/
 
-" ── Function & Struct definitions ────────────────────────────────────────
+" ── Function definitions ─────────────────────────────────────────────────
 
-" Highlight the name of a function being defined
-syn match zzFuncDef /\<func\>\s*\zs\w\+\%(\.\w\+\)*/ contained=zzFuncName
-syn match zzFuncDef /\<func\>\s*\zs\w\+\%(\.\w\+\)*/ nextgroup=zzFuncName
+" func keyword
+syn keyword zzFuncDef func nextgroup=zzFuncName skipwhite
 
-" Match the name after func keyword in function definitions
-syn region zzFuncName
-      \ start=/\<func\>\s\+/ end=/{/me=e-1
-      \ contains=zzKeyword,zzFuncNameChar
-      \ oneline
+" Function name after `func` keyword
+syn match zzFuncName /\w\+\%(\.\w\+\)*/ contained
+
+" ── Struct definitions ────────────────────────────────────────────────────
+
+syn keyword zzStructDef struct nextgroup=zzStructName skipwhite
+syn match zzStructName /\w\+\%(\.\w\+\)*/ contained
 
 " ── Pipeline highlight ───────────────────────────────────────────────────
 
@@ -115,8 +113,7 @@ syn match zzPipe /|>/ containedin=ALL
 hi def link zzKeyword        Keyword
 hi def link zzBoolean        Boolean
 hi def link zzType           Type
-hi def link zzTypeGeneric    Type
-hi def link zzTypeAngle      Delimiter
+hi def link zzTypeBuiltin    Type
 hi def link zzOperator       Operator
 hi def link zzDelimiter      Delimiter
 hi def link zzString         String
@@ -127,6 +124,9 @@ hi def link zzInt            Number
 hi def link zzComment        Comment
 hi def link zzVariant        Constant
 hi def link zzPipe           Operator
+hi def link zzFuncDef        Keyword
 hi def link zzFuncName       Function
+hi def link zzStructDef      Keyword
+hi def link zzStructName     Type
 
 let b:current_syntax = "zz"
