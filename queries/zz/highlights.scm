@@ -17,6 +17,7 @@
 ; ── Types ──
 (primitive_type) @type
 (named_type name: (type_identifier) @type)
+(named_type name: (identifier) @type)
 
 ; ── Functions / structs / consts ──
 (function_definition name: (identifier) @function)
