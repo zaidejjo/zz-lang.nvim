@@ -33,6 +33,34 @@ require("zz-lang").setup({
 
 Run `:checkhealth nvim-zz` to verify your setup.
 
+<details>
+<summary>Full default config (copy and customize)</summary>
+
+```lua
+require("zz-lang").setup({
+  lsp = {
+    enabled = true,                     -- start zz-lsp automatically
+    cmd = { "zz-lsp" },                -- server command
+    root_markers = { "zz.toml", ".git" },
+    capabilities = nil,                 -- override LSP capabilities
+    on_attach = nil,                    -- fun(client, bufnr)
+    inlay_hints = true,                 -- when the server offers them
+  },
+  format = {
+    on_save = true,                     -- format .zz files on write
+    uses_lsp = true,                    -- LSP first, `zz fmt` fallback
+  },
+  commands = {
+    ZZRun = true, ZZCheck = true, ZZFmt = true,
+    ZZTest = true, ZZBuild = true, ZZDoc = true,
+  },
+  snippets = { enabled = true },
+  statusline = { enabled = false },     -- opt-in lualine component
+})
+```
+
+</details>
+
 ## Keys
 
 | Key | Action |
