@@ -23,6 +23,7 @@ M.defaults = {
   zzModule = { fg = "#56B6C2" },
   zzFuncName = { fg = "#61AFEF" },
   zzBuiltin = { fg = "#E5C07B" },
+  zzStdFunc = { fg = "#61AFEF" },
   zzType = { fg = "#98C379" },
   zzTypeBuiltin = { fg = "#98C379" },
   zzStructName = { fg = "#98C379" },
@@ -37,6 +38,7 @@ M.defaults = {
   ["@lsp.type.type"] = { fg = "#98C379" },
   ["@lsp.type.parameter"] = { fg = "#E06C75", italic = true },
   ["@lsp.type.decorator"] = { fg = "#5C6370" },
+  ["@lsp.type.variable"] = { fg = "#A9B1D6" },
 }
 
 ---Plain colorscheme links used when the palette is disabled.
@@ -44,6 +46,7 @@ M.links = {
   zzModule = "Include",
   zzFuncName = "Function",
   zzBuiltin = "Function",
+  zzStdFunc = "Function",
   zzType = "Type",
   zzTypeBuiltin = "Type",
   zzStructName = "Type",
