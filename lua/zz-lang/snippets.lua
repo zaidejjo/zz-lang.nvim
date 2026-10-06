@@ -276,8 +276,48 @@ M.snippets = {
   },
   httpget = {
     trigger = "httpget",
-    body = '${1:srv} |> http.get("${2:/path}", |${3:req}| {\n\t${0}\n})',
-    description = "Register GET route",
+    body = '${1:s} = http.route_get(${1:s}, "${2:/path}", |${3:req}| {\n\t${0}\n})',
+    description = "Register GET route (route_get)",
+  },
+  httproute = {
+    trigger = "httproute",
+    body = '${1:srv} = ${1:srv}.route("${2:GET}", "${3:/path}", |${4:req}| {\n\t${0}\n})',
+    description = "Register route (any method)",
+  },
+  httprouteparam = {
+    trigger = "httprouteparam",
+    body = '${1:srv} = ${1:srv}.route("GET", "${2:/users/:id}", |${3:req}| {\n\t${4:id} := http.param(${3:req}, "id") ?? "${5}"\n\t${0}\n})',
+    description = "Route with :param + http.param",
+  },
+  httprespond = {
+    trigger = "httprespond",
+    body = 'http.respond(${1:200}, ${2:body}, {"Content-Type": "${3:text/html; charset=utf-8}"})',
+    description = "Response with status + headers",
+  },
+  httphtml = {
+    trigger = "httphtml",
+    body = 'http.respond(200, ${1:html}, {"Content-Type": "text/html; charset=utf-8"})',
+    description = "HTML response",
+  },
+  httpjson = {
+    trigger = "httpjson",
+    body = 'http.respond(200, json.stringify(${1:v}) ?? "{}", {"Content-Type": "application/json"})',
+    description = "JSON response",
+  },
+  httpservedir = {
+    trigger = "httpservedir",
+    body = '${1:srv} = http.serve_dir(${1:srv}, "${2:./public}")',
+    description = "Serve static directory",
+  },
+  httplisten = {
+    trigger = "httplisten",
+    body = 'http.listen(${1:srv}, ${2:8080})',
+    description = "Start blocking server",
+  },
+  httplistencfg = {
+    trigger = "httplistencfg",
+    body = 'http.listen_cfg(${1:srv}, ${2:8080}, {"shutdown_ms": ${3:800}})',
+    description = "Start server with options",
   },
 
   -- ── Stdlib: Env ────────────────────────────────────────────────────────
@@ -391,17 +431,19 @@ M.snippets = {
 -- ══════════════════════════════════════════════════════════════════════════
 
 ---All ZZ keywords, builtins, types, and stdlib functions.
+---Generated from crates/zz_stdlib/src/funcs.rs + lib.rs (STDLIB_MODULES).
 ---Used to populate omnifunc and built-in completion.
 M.keywords = {
-  -- Keywords
+  -- Keywords (all 21 — exactly the lexer's set)
   "import", "as", "func", "return", "if", "else", "while", "match",
   "struct", "for", "in", "break", "continue", "defer",
+  "pub", "impl", "const", "extern", "mut",
 
   -- Booleans
   "true", "false",
 
   -- Built-in types
-  "int", "float", "bool", "str",
+  "int", "float", "bool", "str", "unit", "void",
 
   -- Generic types
   "Option", "Result",
@@ -411,48 +453,192 @@ M.keywords = {
 
   -- Top-level builtins (no import required)
   "print", "println", "input",
-  "len", "map", "filter", "enumerate", "zip", "range",
-  "typeof", "str", "int", "float",
-
-  -- std.io
-  "io.printz", "io.println", "io.read_line",
+  "range", "len", "map", "filter", "enumerate", "zip",
+  "typeof", "str", "int", "float", "dbg", "append",
+  "assert", "assert_eq", "assert_ne", "assert_approx_eq", "fail", "panic",
 
   -- std.str
   "str.length", "str.split", "str.contains",
-  "str.trim", "str.to_upper", "str.to_lower",
+  "str.trim", "str.trim_start", "str.trim_end",
+  "str.to_upper", "str.to_lower",
   "str.replace", "str.starts_with", "str.ends_with",
+  "str.join", "str.join_parts", "str.repeat", "str.count",
+  "str.is_empty", "str.reverse",
+  "str.pad_left", "str.pad_right",
+  "str.builder", "str.push_part", "str.finish",
+  "str.builder_len",
 
   -- std.vec
-  "vec.len", "vec.push", "vec.pop", "vec.reverse",
-  "vec.join", "vec.contains", "vec.sort", "vec.insert", "vec.remove",
+  "vec.len", "vec.push", "vec.pop", "vec.enumerate",
+  "vec.fold", "vec.sum", "vec.product",
+  "vec.min_val", "vec.max_val", "vec.sum_f", "vec.product_f",
+  "vec.concat", "vec.flatten", "vec.index_of", "vec.last_index_of",
 
-  -- std.math
-  "math.abs", "math.floor", "math.ceil", "math.sqrt", "math.pow", "math.random",
+  -- std.bytes
+  "bytes.len", "bytes.builder", "bytes.push_byte",
+  "bytes.extend", "bytes.len_of", "bytes.from_ints",
 
   -- std.json
   "json.parse", "json.stringify", "json.get",
   "json.as_str", "json.as_int", "json.as_float", "json.as_bool",
+  "json.null", "json.pretty", "json.type", "json.len", "json.keys",
+  "json.has", "json.merge", "json.deep_get", "json.array_push",
+  "json.validate", "json.parse_or", "json.parse_or_null",
+  "json.path_exists", "json.path_get_or",
+  "json.is_null", "json.is_bool", "json.is_number", "json.is_string",
+  "json.is_array", "json.is_object", "json.is_empty",
 
   -- std.http
-  "http.server", "http.get", "http.post", "http.handle", "http.listen",
+  "http.server", "http.route", "http.route_get", "http.route_post",
+  "http.route_put", "http.route_delete",
+  "http.get", "http.post", "http.put", "http.delete",
+  "http.fetch", "http.fetch_insecure", "http.post_json",
+  "http.handle", "http.listen", "http.listen_cfg",
+  "http.listen_tls", "http.listen_tls_cfg",
+  "http.log", "http.use", "http.pipe", "http.pipe_post",
+  "http.serve_dir", "http.serve_dir_at", "http.hijack",
+  "http.rate_limit", "http.with_headers",
+  "http.test", "http.test_req",
+  "http.respond", "http.ok", "http.created",
+  "http.not_found", "http.redirect",
+  "http.param", "http.query", "http.header",
+  "http.body_json", "http.body_form", "http.body_bytes",
+  "http.cors", "http.secure_headers", "http.secure_header_dict",
+  "http.csrf_token", "http.csrf_check", "http.request_id",
 
   -- std.fs
-  "fs.read_file", "fs.write_file", "fs.exists",
+  "fs.read_file", "fs.read", "fs.read_to_string", "fs.read_bytes",
+  "fs.write_file", "fs.write", "fs.append",
+  "fs.copy", "fs.move", "fs.rename",
+  "fs.exists", "fs.is_file", "fs.is_dir",
+  "fs.remove_file", "fs.remove", "fs.mkdir", "fs.mkdir_all",
+  "fs.read_dir", "fs.readdir", "fs.remove_dir_all", "fs.walk_dir",
+  "fs.stat", "fs.normalize", "fs.join", "fs.basename", "fs.dirname",
+  "fs.is_absolute", "fs.extension",
+  "fs.osfs", "fs.memfs", "fs.tarfs", "fs.embedfs",
+
+  -- std.path
+  "path.join", "path.join_all", "path.normalize", "path.basename",
+  "path.dirname", "path.is_absolute", "path.extension",
 
   -- std.env
-  "env.get_var", "env.args",
+  "env.get_var", "env.var", "env.args", "env.get", "env.set",
+  "env.remove", "env.unset", "env.vars", "env.cwd", "env.set_cwd",
+  "env.exe_path", "env.home_dir", "env.temp_dir",
+  "env.user", "env.os", "env.arch",
+
+  -- std.math
+  "math.abs", "math.floor", "math.ceil", "math.sqrt", "math.pow",
+  "math.random", "math.round", "math.trunc", "math.clamp",
+  "math.signum", "math.hypot", "math.is_nan", "math.is_inf",
+  "math.root", "math.isqrt", "math.factorial", "math.gcd", "math.lcm",
+  "math.sin", "math.cos", "math.tan",
+  "math.asin", "math.acos", "math.atan",
+  "math.sin_deg", "math.cos_deg", "math.tan_deg",
+  "math.to_radians", "math.to_degrees",
+  "math.log", "math.log10", "math.exp",
+  "math.dot_product", "math.magnitude", "math.matrix_mul",
+  "math.mean", "math.median", "math.rand_range",
+  "math.sum", "math.product", "math.count",
+  "math.min", "math.max", "math.is_even", "math.is_odd",
+  "math.min_arr", "math.max_arr", "math.sum_f", "math.product_f",
+  "math.mean_f", "math.median_f",
+  "math.PI", "math.E", "math.TAU",
 
   -- std.time
-  "time.now_ms", "time.sleep_ms",
+  "time.now_ms", "time.now_nanos", "time.now_micros",
+  "time.monotonic_nanos", "time.sleep_ms", "time.sleep_micros",
+  "time.sleep", "time.make_date", "time.parse_rfc3339",
+  "time.format_rfc3339", "time.add_days", "time.diff_days",
+  "time.to_epoch_days", "time.from_epoch_days", "time.is_leap",
+
+  -- std.encoding
+  "encoding.base64_encode", "encoding.base64_decode",
+  "encoding.base64_decode_bytes",
+  "encoding.hex_encode", "encoding.hex_decode",
+  "encoding.url_encode", "encoding.url_decode",
+
+  -- std.net
+  "net.tcp_connect", "net.tcp_listen", "net.tcp_accept",
+  "net.tcp_write", "net.tcp_read", "net.tcp_readline",
+  "net.tcp_close", "net.tcp_read_bytes", "net.tcp_write_bytes",
+  "net.tcp_shutdown",
+
+  -- std.chan / std.task
+  "chan.new", "chan.send", "chan.recv", "chan.try_recv",
+  "task.spawn", "task.join", "task.try_join",
+
+  -- std.regexp
+  "regexp.compile", "regexp.is_match", "regexp.find",
+  "regexp.replace_all", "regexp.captures", "regexp.is_email",
+
+  -- std.crypto
+  "crypto.sha256", "crypto.sha256_bytes", "crypto.sha512",
+  "crypto.hmac_sha256", "crypto.random_bytes", "crypto.ct_eq",
+  "crypto.argon2_hash", "crypto.argon2_verify",
+  "crypto.bcrypt_hash", "crypto.bcrypt_verify",
+  "crypto.ed25519_keypair", "crypto.ed25519_sign",
+  "crypto.ed25519_verify",
+  "crypto.jwt_encode", "crypto.jwt_decode",
+
+  -- std.log
+  "log.trace", "log.debug", "log.info", "log.warn", "log.error",
+  "log.set_level", "log.get_level",
+
+  -- std.sys
+  "sys.os", "sys.arch", "sys.cpu_count",
+  "sys.hostname", "sys.total_mem", "sys.avail_mem",
+
+  -- std.args
+  "args.parse", "args.get_str", "args.get_int", "args.get_bool",
+  "args.positional", "args.subcommand", "args.help",
+
+  -- std.process
+  "process.run", "process.run_with_env", "process.spawn",
+  "process.wait", "process.exit", "process.pid",
+
+  -- std.uuid
+  "uuid.v4", "uuid.v7", "uuid.parse", "uuid.is_valid",
+
+  -- std.sqlz / std.db
+  "sqlz.open", "sqlz.exec", "sqlz.query",
+  "sqlz.close", "sqlz.transaction",
+  "db.open", "db.exec", "db.query", "db.close", "db.transaction",
+
+  -- std.colors
+  "colors.red", "colors.green", "colors.yellow", "colors.blue",
+  "colors.magenta", "colors.cyan", "colors.white",
+  "colors.bold", "colors.dim", "colors.italic", "colors.underline",
+  "colors.reset", "colors.rgb", "colors.hex",
+
+  -- std.term
+  "term.enable_raw", "term.disable_raw", "term.read_key",
+  "term.get_size", "term.is_tty", "term.flush",
+
+  -- std.test
+  "test.assert", "test.assert_eq", "test.assert_ne",
+  "test.assert_approx_eq", "test.fail",
+
+  -- std.map / std.set
+  "map.has", "map.get_or", "map.keys", "map.values",
+  "map.len", "map.is_empty", "map.merge", "map.remove",
+  "set.has", "set.insert", "set.remove", "set.union",
+  "set.intersect", "set.diff", "set.len", "set.is_empty",
+
+  -- std.dec
+  "dec.is_valid", "dec.add", "dec.sub", "dec.mul",
+  "dec.cmp", "dec.eq", "dec.lt", "dec.gt", "dec.format",
+
+  -- std.csv
+  "csv.parse", "csv.parse_delim", "csv.stringify",
+  "csv.stringify_delim", "csv.header", "csv.records",
+  "csv.len", "csv.get_cell", "csv.validate", "csv.to_json",
 
   -- Option/Result methods
   "option.unwrap", "option.unwrap_or", "option.expect",
   "result.unwrap", "result.unwrap_or", "result.expect",
 
-  -- Iteration builtins
-  "for", "in", "if", "while",
-
-  -- Operators
+  -- Operators (word forms, if any)
   "and", "or", "not",
 }
 
@@ -534,15 +720,40 @@ function _G.zz_omnifunc(findstart, base)
     return start
   end
 
-  -- Search the keyword dictionary
+  -- Search the keyword dictionary (enriched with signatures from docs.lua),
+  -- then the full generated stdlib database (887 entries: both spellings).
+  local ok_docs, docs = pcall(require, "zz-lang.docs")
+  local seen = {}
   local matches = {}
+  local function push(word, sig)
+    if not seen[word] then
+      seen[word] = true
+      table.insert(matches, { word = word, kind = "ZZ", menu = sig or "" })
+    end
+  end
   for _, kw in ipairs(M.keywords) do
     if kw:find(base, 1, true) == 1 then
-      table.insert(matches, {
-        word = kw,
-        kind = "ZZ",
-        menu = "",
-      })
+      local sig = ok_docs and docs.get(kw) and docs.get(kw).sig or ""
+      push(kw, sig)
+    end
+  end
+  if ok_docs then
+    for name, entry in pairs(docs.docs) do
+      if name:find(base, 1, true) == 1 then
+        push(name, entry.sig)
+      else
+        -- also match on the short suffix: "serve_dir" finds http.serve_dir
+        local short = name:match("%.([^.]+)$")
+        if short and short:find(base, 1, true) == 1 then
+          push(name, entry.sig)
+        end
+      end
+    end
+    -- snippet triggers complete too (expand via luasnip/cmp/snippet engine)
+    for _, snip in pairs(M.snippets) do
+      if snip.trigger:find(base, 1, true) == 1 then
+        push(snip.trigger, snip.description)
+      end
     end
   end
   return matches

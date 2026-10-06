@@ -1,8 +1,8 @@
 # zz-lang.nvim
 
-All-in-one Neovim plugin for the [ZZ programming language](https://github.com/zaidejjo/zz_lang).
+All-in-one Neovim plugin for the [ZZ programming language](https://github.com/zz-language/zz).
 
-Zero external plugin dependencies.  Uses Neovim's built-in LSP client (`vim.lsp.start()`).
+Docs: <https://zz-lang.pages.dev>. Zero external plugin dependencies.  Uses Neovim's built-in LSP client (`vim.lsp.start()`).
 
 ## Features
 
@@ -16,21 +16,25 @@ Zero external plugin dependencies.  Uses Neovim's built-in LSP client (`vim.lsp.
 | **Rename** | Rename symbols across files with `<leader>rn` |
 | **Code actions** | Quick fixes for diagnostics with `<leader>ca` |
 | **Formatting** | Format-on-save + `:ZZFmt` command |
-| **Inlay hints** | Parameter names at call sites |
+| **Inlay hints** | Parameter names at call sites (when server offers them, `<leader>th` toggles) |
 | **Semantic tokens** | AST-based syntax highlighting from the LSP |
 | **Folding ranges** | Collapse functions, structs, loops |
 | **Diagnostics** | Real-time errors and warnings |
-| **Syntax highlighting** | Vim syntax for all ZZ keywords, types, operators |
-| **Snippets** | Code snippets for common ZZ constructs |
+| **Syntax highlighting** | Full Vim syntax: 21 keywords, `"""` strings + interpolation, all operators |
+| **Tree-sitter queries** | `queries/zz/` highlights/folds/indents for the tree-sitter-zz parser |
+| **Snippets** | Code snippets for common ZZ constructs (incl. HTTP routes/responses) |
+| **Completion** | ~450-entry stdlib dictionary + luasnip/cmp omnifunc fallback |
+| **Health check** | `:checkhealth zz-lang` verifies CLI, LSP, engines, parser |
 | **Statusline** | Lualine component showing LSP status |
-| **CLI commands** | `:ZZRun`, `:ZZCheck`, `:ZZFmt` |
+| **CLI commands** | `:ZZRun`, `:ZZCheck`, `:ZZFmt`, `:ZZTest`, `:ZZBuild`, `:ZZDiag` |
+| **Import navigation** | `gf` resolves `import std.x` (with `ZZ_ROOT`) and relative imports |
 
 ## Requirements
 
 - **Neovim** >= 0.8 (for `vim.lsp.start()`)
 - **zz-lsp** binary in your `$PATH`
 
-Install `zz-lsp` from the [ZZ repository](https://github.com/zaidejjo/zz_lang):
+Install `zz-lsp` from the [ZZ repository](https://github.com/zz-language/zz):
 
 ```bash
 cargo build --release -p zz_lsp
@@ -99,9 +103,10 @@ require("zz-lang").setup({
   lsp = {
     enabled = true,                -- start zz-lsp automatically
     cmd = { "zz-lsp" },           -- command to start the server
-    root_markers = { ".git", "*.zz" },  -- project root detection
+    root_markers = { "zz.toml", ".git" },  -- project root detection
     capabilities = nil,            -- override LSP capabilities
     on_attach = nil,               -- callback: function(client, bufnr)
+    inlay_hints = true,            -- enable inlay hints when offered
   },
 
   -- Formatting
@@ -115,6 +120,9 @@ require("zz-lang").setup({
     ZZRun = true,                  -- :ZZRun  — run current file
     ZZCheck = true,                -- :ZZCheck — type-check current file
     ZZFmt = true,                  -- :ZZFmt — format current file
+    ZZTest = true,                 -- :ZZTest — test current file
+    ZZBuild = true,                -- :ZZBuild — build current file
+    ZZDoc = true,                  -- :ZZDoc — stdlib help popup
   },
 
   -- Snippets
@@ -139,11 +147,14 @@ Default keymaps (set when a `.zz` file is opened):
 | `gD` | n | Go to declaration |
 | `gr` | n | Find references |
 | `gi` | n | Go to implementation |
-| `K` | n | Hover documentation |
+| `K` | n | Hover documentation (stdlib docs fallback when LSP is off) |
 | `<C-k>` | n, i | Signature help |
 | `<leader>rn` | n | Rename symbol |
 | `<leader>ca` | n | Code action |
 | `<leader>f` | n | Format buffer |
+| `]d` / `[d` | n | Next / previous diagnostic |
+| `<leader>th` | n | Toggle inlay hints |
+| `grr` | n | Find references (forced request) |
 
 Override any keymap in your `on_attach`:
 
@@ -165,6 +176,9 @@ require("zz-lang").setup({
 | `:ZZRun` | Run the current file (`zz run <file>`) in a terminal split |
 | `:ZZCheck` | Type-check the current file (`zz check <file>`) |
 | `:ZZFmt` | Format the current file (via LSP or `zz fmt`) |
+| `:ZZTest` | Test the current file (`zz test <file>`) |
+| `:ZZBuild` | Build the current file (`zz build <file>`) |
+| `:ZZDoc` | Stdlib help for the word under the cursor (885 signatures) |
 | `:ZZDiag` | Show diagnostics at the cursor line |
 
 ## Formatting

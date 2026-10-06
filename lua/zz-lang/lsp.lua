@@ -49,17 +49,33 @@ local function setup_keymaps(bufnr)
   map("n", "gD", vim.lsp.buf.declaration, "go to declaration")
   map("n", "gr", vim.lsp.buf.references, "find references")
   map("n", "gi", vim.lsp.buf.implementation, "go to implementation")
-  map("n", "K", vim.lsp.buf.hover, "hover documentation")
+  -- K: LSP hover when attached, stdlib docs fallback otherwise.
+  map("n", "K", function()
+    local clients = vim.lsp.get_clients({ bufnr = bufnr })
+    if #clients > 0 then
+      vim.lsp.buf.hover()
+    else
+      require("zz-lang.docs").show_cursor()
+    end
+  end, "hover documentation / stdlib docs")
   map("n", "<leader>rn", vim.lsp.buf.rename, "rename symbol")
   map("n", "<leader>ca", vim.lsp.buf.code_action, "code action")
   map("n", "<C-k>", vim.lsp.buf.signature_help, "signature help")
   map("i", "<C-k>", vim.lsp.buf.signature_help, "signature help")
   map("n", "<leader>f", function() vim.lsp.buf.format({ bufnr = bufnr }) end, "format")
 
-  -- Diagnostic navigation
   map("n", "]d", vim.diagnostic.goto_next, "next diagnostic")
   map("n", "[d", vim.diagnostic.goto_prev, "prev diagnostic")
   map("n", "<leader>dl", vim.diagnostic.open_float, "line diagnostics")
+  map("n", "<leader>th", function()
+    if vim.lsp.inlay_hint then
+      local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr })
+      vim.lsp.inlay_hint.enable(not enabled, { bufnr = bufnr })
+    end
+  end, "toggle inlay hints")
+  -- References: zz-lsp implements textDocument/references even though
+  -- older server versions do not advertise it — keep the keymap.
+  map("n", "grr", vim.lsp.buf.references, "find references (force)")
 end
 
 ---on_attach callback — called when zz-lsp attaches to a buffer.
@@ -68,6 +84,16 @@ local function on_attach(ev)
   local bufnr = ev.buf
   setup_keymaps(bufnr)
   vim.diagnostic.enable(bufnr)
+
+  -- Inlay hints: only when the server advertises them.
+  local client = vim.lsp.get_client_by_id(ev.data and ev.data.client_id)
+  if
+    client
+    and client.supports_method("textDocument/inlayHint", { bufnr = bufnr })
+    and vim.lsp.inlay_hint
+  then
+    pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
+  end
 end
 
 ---Start (or re-use) the zz-lsp language server.

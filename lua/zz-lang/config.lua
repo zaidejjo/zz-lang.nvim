@@ -8,6 +8,7 @@ local M = {}
 ---@field root_markers string[]
 ---@field capabilities table|nil
 ---@field on_attach fun(client: table, bufnr: integer)|nil
+---@field inlay_hints boolean Enable inlay hints when the server offers them
 
 ---@class ZzConfigFormat
 ---@field on_save boolean
@@ -17,6 +18,9 @@ local M = {}
 ---@field ZZRun boolean
 ---@field ZZCheck boolean
 ---@field ZZFmt boolean
+---@field ZZTest boolean
+---@field ZZBuild boolean
+---@field ZZDoc boolean
 
 ---@class ZzConfigSnippets
 ---@field enabled boolean
@@ -35,9 +39,10 @@ M.defaults = {
   lsp = {
     enabled = true,
     cmd = { "zz-lsp" },
-    root_markers = { ".git", "*.zz" },
+    root_markers = { "zz.toml", ".git" },
     capabilities = nil,
     on_attach = nil,
+    inlay_hints = true,
   },
 
   format = {
@@ -49,6 +54,9 @@ M.defaults = {
     ZZRun = true,
     ZZCheck = true,
     ZZFmt = true,
+    ZZTest = true,
+    ZZBuild = true,
+    ZZDoc = true,
   },
 
   snippets = {

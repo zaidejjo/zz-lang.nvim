@@ -3,25 +3,50 @@
 -- :ZZRun    — run current file with `zz run`
 -- :ZZCheck  — type-check current file with `zz check`
 -- :ZZFmt    — format current file with `zz fmt` or LSP
+-- :ZZTest   — run tests with `zz test`
+-- :ZZBuild  — compile current file with `zz build`
 
 local M = {}
 
-local function run_current_file()
+local function current_file_or_warn()
   local filepath = vim.fn.expand("%:p")
   if filepath == "" then
     vim.notify("zz-lang: no file to run", vim.log.levels.WARN)
+    return nil
+  end
+  return filepath
+end
+
+local function run_current_file()
+  local filepath = current_file_or_warn()
+  if not filepath then
     return
   end
   vim.cmd("terminal zz run " .. vim.fn.shellescape(filepath))
 end
 
 local function check_current_file()
-  local filepath = vim.fn.expand("%:p")
-  if filepath == "" then
-    vim.notify("zz-lang: no file to check", vim.log.levels.WARN)
+  local filepath = current_file_or_warn()
+  if not filepath then
     return
   end
   vim.cmd("terminal zz check " .. vim.fn.shellescape(filepath))
+end
+
+local function test_current_file()
+  local filepath = current_file_or_warn()
+  if not filepath then
+    return
+  end
+  vim.cmd("terminal zz test " .. vim.fn.shellescape(filepath))
+end
+
+local function build_current_file()
+  local filepath = current_file_or_warn()
+  if not filepath then
+    return
+  end
+  vim.cmd("terminal zz build " .. vim.fn.shellescape(filepath))
 end
 
 local function fmt_current_file()
@@ -52,6 +77,26 @@ function M.register(config)
       desc = "ZZ: format current file",
       nargs = 0,
     })
+  end
+
+  if config.commands.ZZTest then
+    vim.api.nvim_create_user_command("ZZTest", test_current_file, {
+      desc = "ZZ: test current file",
+      nargs = 0,
+    })
+  end
+
+  if config.commands.ZZBuild then
+    vim.api.nvim_create_user_command("ZZBuild", build_current_file, {
+      desc = "ZZ: build current file to a native binary",
+      nargs = 0,
+    })
+  end
+
+  if config.commands.ZZDoc then
+    vim.api.nvim_create_user_command("ZZDoc", function()
+      require("zz-lang.docs").show_cursor()
+    end, { desc = "ZZ: stdlib help for word under cursor" })
   end
 
   -- Always register diagnostic navigation
