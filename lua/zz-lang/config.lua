@@ -31,6 +31,8 @@ local M = {}
 ---@class ZzConfigHighlight
 ---@field semantic_tokens boolean Compiler-driven colors (namespaces, fns, types) via LSP
 ---@field references boolean Highlight symbol references under the cursor
+---@field palette boolean Distinct ZZ color palette (disable for plain theme links)
+---@field colors table<string, table> Per-group highlight overrides
 
 ---@class ZzConfig
 ---@field lsp ZzConfigLsp
@@ -75,6 +77,8 @@ M.defaults = {
   highlight = {
     semantic_tokens = true,
     references = true,
+    palette = true,
+    colors = {},
   },
 }
 

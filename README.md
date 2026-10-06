@@ -78,6 +78,27 @@ Three layers, each enhancing the last:
 
 Cursor reference highlighting follows `highlight.references`.
 
+Colors come from the built-in palette (`highlight.palette`, on by
+default): modules teal, functions blue, builtins yellow, types green,
+consts orange, parameters red italic. Override groups with
+`highlight = { colors = { zzModule = { fg = "#ff0000" } } }`, or set
+`highlight = { palette = false }` for plain colorscheme links.
+
+## Troubleshooting
+
+**Accepting a completion inserts `()`.** Our items are bare names
+(plain-text, verified by test) — the parens come from a client-side
+autopairs hook, classically:
+
+```lua
+-- nvim-cmp + nvim-autopairs: skip the hook for ZZ files, or drop it
+cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+```
+
+Remove that line (or guard it by filetype) and completions insert
+exactly the shown name. Signature help (`(` / `<C-k>`) still shows
+parameters while typing.
+
 ## Copy-paste setup
 
 **Lazy plugin file** (`~/.config/nvim/lua/plugins/zz.lua`):

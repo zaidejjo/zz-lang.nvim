@@ -36,6 +36,10 @@ function M.setup(opts)
   if M.config.statusline.enabled then
     require("zz-lang.statusline").enable()
   end
+
+  -- 6. Highlight palette (distinct colors per category; re-applied on
+  --    colorscheme change by the module itself)
+  require("zz-lang.highlights").setup(M.config)
 end
 
 return M
