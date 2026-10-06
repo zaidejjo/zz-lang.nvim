@@ -40,8 +40,10 @@ syn keyword zzBuiltin print println input
 
 " ── Stdlib modules (receivers / namespaces) ───────────────────────────────
 " `str.` `http.` … — highlighted so namespaced calls read as one unit.
+" The trailing dot is optional so the last import segment (`import std.math`
+" → `math`) colors too; a bare word match elsewhere is harmless.
 syn match zzModule
-      \ /\<\(std\|str\|vec\|bytes\|json\|http\|fs\|file\|path\|env\|math\|time\|encoding\|net\|chan\|task\|regexp\|crypto\|log\|span\|sys\|args\|process\|uuid\|sqlz\|db\|colors\|term\|test\|map\|set\|dec\|csv\|option\|result\|File\|ArgsParser\|Regexp\)\./
+      \ /\<\(std\|str\|vec\|bytes\|json\|http\|fs\|file\|path\|env\|math\|time\|encoding\|net\|chan\|task\|regexp\|crypto\|log\|span\|sys\|args\|process\|uuid\|sqlz\|db\|colors\|term\|test\|map\|set\|dec\|csv\|option\|result\|File\|ArgsParser\|Regexp\)\(\.\|$\)/
 
 " ── Decorators ────────────────────────────────────────────────────────────
 syn match zzDecorator /@\w\+/
@@ -87,8 +89,8 @@ syn match zzDelimiter /[()\[\]{}]/
 
 " ── Strings ───────────────────────────────────────────────────────────────
 " Escapes are identical in both modes: \n \t \r \\ \" \{ \} \e \xHH.
-" `{{` and `}}` stay literal (highlighted as escapes); only {ident (+
-" {digit / {( in triple strings) interpolates.
+" `{{` and `}}` stay literal (highlighted as escapes); both string modes
+" interpolate {ident, {digit and {( — doubled braces for a literal `{`.
 syn match zzEscape /\\[ntr\\"{}e]/ contained
 syn match zzEscape /\\x\x\{2}/ contained
 syn match zzBraceEscape /{{/ contained
@@ -98,8 +100,10 @@ syn match zzBraceEscape /}}/ contained
 syn region zzString start=/"/ skip=/\\"/ end=/"/ oneline
       \ contains=zzEscape,zzBraceEscape,zzInterp
 
-" Interpolation in "...": { + ident-start only
-syn region zzInterp matchgroup=zzInterpBrace start=/{[A-Za-z_]/
+" Interpolation in "...": { + ident / digit / paren (same rule as
+" """...""", since the lexer widened single-line triggers; {{
+" stays an escape — zzBraceEscape wins because `{` alone never matches)
+syn region zzInterp matchgroup=zzInterpBrace start=/{[A-Za-z0-9_(]/
       \ end=/}/ contained
       \ contains=zzKeyword,zzBoolean,zzType,zzTypeBuiltin,zzBuiltin,
       \ zzModule,zzDecorator,zzOperator,zzDelimiter,

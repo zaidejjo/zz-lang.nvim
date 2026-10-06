@@ -28,10 +28,55 @@ Everything works out of the box. Override only what you need:
 require("zz-lang").setup({
   format = { on_save = false },          -- default: format on save
   lsp = { cmd = { "zz-lsp" } },          -- default server command
+  highlight = { semantic_tokens = true, references = true },
 })
 ```
 
-Run `:checkhealth nvim-zz` to verify your setup.
+Run `:checkhealth nvim-zz` to verify your setup (it also warns when
+`zz-lsp --version` disagrees with `zz --version` — reinstall both from
+the same tree, then restart the editor).
+
+## Autocomplete
+
+Completion is served by `zz-lsp`: bare names, `math.`/`table.` members
+with signatures, `std.` modules, `import std.…` paths, selective lists
+(`import std.math(P…)`), and workspace/dependency members — including
+`pub` globals, structs and generics. It works with zero extra plugins:
+
+- `<C-Space>` (insert mode) or `C-x C-o` triggers it via omnifunc.
+- With `nvim-cmp` or `blink.cmp` installed, their capabilities are
+  merged automatically and completions appear as you type.
+- Snippet triggers (`func`, `match`, …) complete through the same menu.
+
+Optional `nvim-cmp` filetype wiring:
+
+```lua
+-- after cmp.setup(...)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "zz",
+  callback = function()
+    require("cmp").setup.buffer({
+      sources = { { name = "nvim_lsp" }, { name = "zz-snippets" } },
+    })
+  end,
+})
+```
+
+Optional `blink.cmp` (it picks up the LSP source automatically; just
+make sure `zz` filetypes are not excluded).
+
+## Highlighting
+
+Three layers, each enhancing the last:
+
+1. Vim regex syntax out of the box (`{expr}` interpolation, `{{`
+   escapes, strings, numbers, `zzModule` namespaces like `math.`).
+2. Tree-sitter queries when the `zz` parser is installed.
+3. **Semantic tokens from `zz-lsp`** (on by default): the compiler
+   colors namespaces, functions, types, params and variables itself.
+   Toggle with `highlight = { semantic_tokens = false }`.
+
+Cursor reference highlighting follows `highlight.references`.
 
 ## Copy-paste setup
 

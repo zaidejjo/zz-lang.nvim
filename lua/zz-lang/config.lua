@@ -28,12 +28,17 @@ local M = {}
 ---@class ZzConfigStatusline
 ---@field enabled boolean
 
+---@class ZzConfigHighlight
+---@field semantic_tokens boolean Compiler-driven colors (namespaces, fns, types) via LSP
+---@field references boolean Highlight symbol references under the cursor
+
 ---@class ZzConfig
 ---@field lsp ZzConfigLsp
 ---@field format ZzConfigFormat
 ---@field commands ZzConfigCommands
 ---@field snippets ZzConfigSnippets
 ---@field statusline ZzConfigStatusline
+---@field highlight ZzConfigHighlight
 
 M.defaults = {
   lsp = {
@@ -65,6 +70,11 @@ M.defaults = {
 
   statusline = {
     enabled = false,
+  },
+
+  highlight = {
+    semantic_tokens = true,
+    references = true,
   },
 }
 

@@ -44,6 +44,13 @@ function _G.zz_includeexpr(fname)
   return fname
 end
 
+-- Completion fallback: dictionary omnifunc until zz-lsp attaches and
+-- upgrades it to v:lua.vim.lsp.omnifunc (see lua/zz-lang/lsp.lua).
+-- Keeps C-x C-o / <C-Space> useful with no server running.
+if vim.bo.omnifunc == "" then
+  vim.bo.omnifunc = "v:lua.zz_omnifunc"
+end
+
 -- Folding via syntax (window-local options)
 wo.foldmethod = "syntax"
 wo.foldlevel = 99

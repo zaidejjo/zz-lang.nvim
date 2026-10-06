@@ -22,11 +22,35 @@ function M.check()
     vim.health.error("zz CLI not in $PATH (needed for :ZZRun/:ZZCheck/:ZZFmt)")
   end
 
-  -- zz-lsp server
+  -- zz-lsp server (+ version match against the CLI)
   if vim.fn.executable("zz-lsp") == 1 then
-    vim.health.ok("zz-lsp binary in $PATH")
+    local lsp_out = vim.fn.systemlist("zz-lsp --version")
+    local lsp_ver = (lsp_out[1] or ""):match("(%d+%.%d+%.%d+)")
+    if lsp_ver then
+      local cli_out = vim.fn.systemlist("zz --version")
+      local cli_ver = (cli_out[1] or ""):match("(%d+%.%d+%.%d+)")
+      if cli_ver and lsp_ver ~= cli_ver then
+        vim.health.warn(
+          ("zz-lsp %s predates zz CLI %s — restart the editor after reinstalling both from the same tree"):format(
+            lsp_ver,
+            cli_ver
+          )
+        )
+      else
+        vim.health.ok("zz-lsp " .. lsp_ver .. " (matches CLI)")
+      end
+    else
+      vim.health.warn("zz-lsp answers no --version (predates 0.1.6): reinstall from this tree, then restart the editor")
+    end
   else
     vim.health.error("zz-lsp not in $PATH (build with: cargo build --release -p zz_lsp)")
+  end
+
+  -- Semantic tokens (compiler-driven colors) need Neovim 0.10+ APIs.
+  if vim.lsp and vim.lsp.semantic_tokens then
+    vim.health.ok("semantic-token API present (zz namespaces/functions get server colors)")
+  else
+    vim.health.warn("no vim.lsp.semantic_tokens — regex/tree-sitter highlighting only")
   end
 
   -- Optional completion engines

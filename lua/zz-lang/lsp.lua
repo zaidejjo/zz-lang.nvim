@@ -62,6 +62,16 @@ local function setup_keymaps(bufnr)
   map("n", "<leader>ca", vim.lsp.buf.code_action, "code action")
   map("n", "<C-k>", vim.lsp.buf.signature_help, "signature help")
   map("i", "<C-k>", vim.lsp.buf.signature_help, "signature help")
+  -- Manual completion: works with LSP (omnifunc) or the dict fallback.
+  map("i", "<C-Space>", function()
+    if vim.bo[bufnr].omnifunc ~= "" then
+      vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes("<C-x><C-o>", true, false, true),
+        "m",
+        false
+      )
+    end
+  end, "trigger completion")
   map("n", "<leader>f", function() vim.lsp.buf.format({ bufnr = bufnr }) end, "format")
 
   map("n", "]d", vim.diagnostic.goto_next, "next diagnostic")
@@ -78,28 +88,118 @@ local function setup_keymaps(bufnr)
   map("n", "grr", vim.lsp.buf.references, "find references (force)")
 end
 
+---Enable compiler-driven semantic highlighting for a buffer.
+---Falls back silently on older Neovim / older servers.
+---@param bufnr integer
+---@param client table
+local function setup_semantic_tokens(bufnr, client)
+  local supports = false
+  if client.supports_method then
+    local ok, res = pcall(client.supports_method, client, "textDocument/semanticTokens/full", { bufnr = bufnr })
+    supports = ok and res or false
+  end
+  if not supports then
+    return
+  end
+  local st = vim.lsp.semantic_tokens
+  if not st then
+    return
+  end
+  -- API shape differs across versions: 0.11+ has enable(), 0.10 has start().
+  if st.enable then
+    pcall(st.enable, true, { bufnr = bufnr })
+  elseif st.start then
+    pcall(st.start, bufnr, client.id)
+  end
+end
+
+---Highlight symbol references under the cursor (CursorHold).
+---@param bufnr integer
+---@param client table
+local function setup_reference_highlight(bufnr, client)
+  local supports = false
+  if client.supports_method then
+    local ok, res = pcall(client.supports_method, client, "textDocument/documentHighlight", { bufnr = bufnr })
+    supports = ok and res or false
+  end
+  if not supports then
+    return
+  end
+  local group = vim.api.nvim_create_augroup("zz_lang_highlight_" .. bufnr, { clear = true })
+  vim.api.nvim_create_autocmd("CursorHold", {
+    group = group,
+    buffer = bufnr,
+    callback = function()
+      pcall(vim.lsp.buf.document_highlight)
+    end,
+    desc = "ZZ: highlight references under cursor",
+  })
+  vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter" }, {
+    group = group,
+    buffer = bufnr,
+    callback = function()
+      pcall(vim.lsp.buf.clear_references)
+    end,
+    desc = "ZZ: clear reference highlights",
+  })
+end
+
 ---on_attach callback — called when zz-lsp attaches to a buffer.
+---@param config ZzConfig
 ---@param ev table LspAttach event data.
-local function on_attach(ev)
+local function on_attach(config, ev)
   local bufnr = ev.buf
   setup_keymaps(bufnr)
   vim.diagnostic.enable(bufnr)
 
-  -- Inlay hints: only when the server advertises them.
   local client = vim.lsp.get_client_by_id(ev.data and ev.data.client_id)
+
+  -- Completion: the server is the primary source now (selective imports,
+  -- member functions, signatures). The dict omnifunc from ftplugin stays
+  -- as the no-server fallback — it is only replaced when LSP is live.
+  if client then
+    vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
+  end
+
+  -- Full color from the compiler: semantic tokens layer namespaces,
+  -- functions, types, params and variables over the regex/tree-sitter base.
+  if client and config.highlight.semantic_tokens then
+    setup_semantic_tokens(bufnr, client)
+  end
+
+  -- Reference highlighting under the cursor.
+  if client and config.highlight.references then
+    setup_reference_highlight(bufnr, client)
+  end
+
+  -- Inlay hints: only when enabled in config AND advertised by the server.
   if
     client
+    and config.lsp.inlay_hints
     and client.supports_method("textDocument/inlayHint", { bufnr = bufnr })
     and vim.lsp.inlay_hint
   then
     pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
+  end
+
+  -- User hook runs last so it can override anything above.
+  if type(config.lsp.on_attach) == "function" then
+    pcall(config.lsp.on_attach, client, bufnr)
   end
 end
 
 ---Start (or re-use) the zz-lsp language server.
 ---@param config ZzConfig
 function M.start(config)
+  -- Project root from root_markers (zz.toml, .git): falls back to cwd so
+  -- single-file buffers outside any project still get a server.
   local root_dir = vim.fn.getcwd()
+  if vim.fs and vim.fs.root then
+    local found = vim.fs.root(0, config.lsp.root_markers)
+    if found then
+      root_dir = found
+    end
+  end
 
   -- Build capabilities with completion plugin support
   local base_caps = config.lsp.capabilities
@@ -123,7 +223,9 @@ function M.start(config)
     cmd = config.lsp.cmd,
     root_dir = root_dir,
     capabilities = capabilities,
-    on_attach = on_attach,
+    on_attach = function(ev)
+      on_attach(config, ev)
+    end,
     settings = {},
   }
 
