@@ -1,301 +1,52 @@
 # nvim-zz
 
-All-in-one Neovim plugin for the [ZZ programming language](https://github.com/zz-language/zz).
-
-Docs: <https://zz-lang.pages.dev>. Zero external plugin dependencies.  Uses Neovim's built-in LSP client (`vim.lsp.start()`).
-
-## Features
-
-| Feature | Description |
-|---|---|
-| **LSP** | Full language server integration via `zz-lsp` |
-| **Completion** | Context-aware autocompletion (variables, functions, fields) |
-| **Hover** | Type information and documentation on `K` |
-| **Go-to-definition** | Navigate to symbols with `gd` |
-| **Find references** | Find all usages with `gr` |
-| **Rename** | Rename symbols across files with `<leader>rn` |
-| **Code actions** | Quick fixes for diagnostics with `<leader>ca` |
-| **Formatting** | Format-on-save + `:ZZFmt` command |
-| **Inlay hints** | Parameter names at call sites (when server offers them, `<leader>th` toggles) |
-| **Semantic tokens** | AST-based syntax highlighting from the LSP |
-| **Folding ranges** | Collapse functions, structs, loops |
-| **Diagnostics** | Real-time errors and warnings |
-| **Syntax highlighting** | Full Vim syntax: 21 keywords, `"""` strings + interpolation, all operators |
-| **Tree-sitter queries** | `queries/zz/` highlights/folds/indents for the tree-sitter-zz parser |
-| **Snippets** | Code snippets for common ZZ constructs (incl. HTTP routes/responses) |
-| **Completion** | ~450-entry stdlib dictionary + luasnip/cmp omnifunc fallback |
-| **Health check** | `:checkhealth nvim-zz` verifies CLI, LSP, engines, parser |
-| **Statusline** | Lualine component showing LSP status |
-| **CLI commands** | `:ZZRun`, `:ZZCheck`, `:ZZFmt`, `:ZZTest`, `:ZZBuild`, `:ZZDiag` |
-| **Import navigation** | `gf` resolves `import std.x` (with `ZZ_ROOT`) and relative imports |
+Neovim plugin for [ZZ](https://github.com/zz-language/zz). Zero dependencies — uses the built-in LSP client. Docs: <https://zz-lang.pages.dev>.
 
 ## Requirements
 
-- **Neovim** >= 0.8 (for `vim.lsp.start()`)
-- **zz-lsp** binary in your `$PATH`
-
-Install `zz-lsp` from the [ZZ repository](https://github.com/zz-language/zz):
+Neovim >= 0.8, plus the `zz` CLI and `zz-lsp` binary in `$PATH`:
 
 ```bash
-cargo build --release -p zz_lsp
-# Copy target/release/zz-lsp to a directory in your PATH
-sudo cp target/release/zz-lsp /usr/local/bin/
+cargo install --path crates/zz_cli
+cargo build --release -p zz_lsp && sudo cp target/release/zz-lsp /usr/local/bin/
 ```
 
-## Installation
-
-### lazy.nvim (recommended)
+## Install
 
 ```lua
-{
-  "zz-language/nvim-zz",
-  ft = "zz",
-  config = function()
-    require("zz-lang").setup({
-      -- your config overrides here (optional)
-    })
-  end,
-}
+-- lazy.nvim
+{ "zz-language/nvim-zz", ft = "zz", config = function() require("zz-lang").setup() end }
 ```
 
-### packer.nvim
+No plugin manager? Clone to `~/.local/share/nvim/site/pack/plugins/start/nvim-zz` and call `require("zz-lang").setup()`.
 
-```lua
-use {
-  "zz-language/nvim-zz",
-  ft = "zz",
-  config = function()
-    require("zz-lang").setup()
-  end,
-}
-```
+## Configure
 
-### vim-plug
-
-```vim
-Plug 'zz-language/nvim-zz'
-
-autocmd FileType zz lua require("zz-lang").setup()
-```
-
-### Manual
-
-Clone into your Neovim plugin directory:
-
-```bash
-git clone https://github.com/zz-language/nvim-zz \
-  ~/.local/share/nvim/site/pack/plugins/start/nvim-zz
-```
-
-Then add to your `init.lua`:
-
-```lua
-require("zz-lang").setup()
-```
-
-## Configuration
-
-All options with their defaults:
+Everything works out of the box. Override only what you need:
 
 ```lua
 require("zz-lang").setup({
-  -- LSP server configuration
-  lsp = {
-    enabled = true,                -- start zz-lsp automatically
-    cmd = { "zz-lsp" },           -- command to start the server
-    root_markers = { "zz.toml", ".git" },  -- project root detection
-    capabilities = nil,            -- override LSP capabilities
-    on_attach = nil,               -- callback: function(client, bufnr)
-    inlay_hints = true,            -- enable inlay hints when offered
-  },
-
-  -- Formatting
-  format = {
-    on_save = true,                -- format .zz files on write
-    uses_lsp = true,               -- use LSP formatting; falls back to `zz fmt`
-  },
-
-  -- User commands
-  commands = {
-    ZZRun = true,                  -- :ZZRun  — run current file
-    ZZCheck = true,                -- :ZZCheck — type-check current file
-    ZZFmt = true,                  -- :ZZFmt — format current file
-    ZZTest = true,                 -- :ZZTest — test current file
-    ZZBuild = true,                -- :ZZBuild — build current file
-    ZZDoc = true,                  -- :ZZDoc — stdlib help popup
-  },
-
-  -- Snippets
-  snippets = {
-    enabled = true,                -- register ZZ snippet triggers
-  },
-
-  -- Statusline integration
-  statusline = {
-    enabled = false,               -- opt-in lualine component
-  },
+  format = { on_save = false },          -- default: format on save
+  lsp = { cmd = { "zz-lsp" } },          -- default server command
 })
 ```
 
-## Keymaps
+Run `:checkhealth nvim-zz` to verify your setup.
 
-Default keymaps (set when a `.zz` file is opened):
+## Keys
 
-| Key | Mode | Action |
-|---|---|---|
-| `gd` | n | Go to definition |
-| `gD` | n | Go to declaration |
-| `gr` | n | Find references |
-| `gi` | n | Go to implementation |
-| `K` | n | Hover documentation (stdlib docs fallback when LSP is off) |
-| `<C-k>` | n, i | Signature help |
-| `<leader>rn` | n | Rename symbol |
-| `<leader>ca` | n | Code action |
-| `<leader>f` | n | Format buffer |
-| `]d` / `[d` | n | Next / previous diagnostic |
-| `<leader>th` | n | Toggle inlay hints |
-| `grr` | n | Find references (forced request) |
-
-Override any keymap in your `on_attach`:
-
-```lua
-require("zz-lang").setup({
-  lsp = {
-    on_attach = function(client, bufnr)
-      -- Your custom keymaps here
-      vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = bufnr })
-    end,
-  },
-})
-```
+| Key | Action |
+|---|---|
+| `gd` / `gr` / `K` | Definition / references / hover (`K` falls back to stdlib docs) |
+| `<leader>rn` / `<leader>ca` | Rename / code action |
+| `<leader>f` | Format buffer |
+| `]d` / `[d` | Next / previous diagnostic |
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| `:ZZRun` | Run the current file (`zz run <file>`) in a terminal split |
-| `:ZZCheck` | Type-check the current file (`zz check <file>`) |
-| `:ZZFmt` | Format the current file (via LSP or `zz fmt`) |
-| `:ZZTest` | Test the current file (`zz test <file>`) |
-| `:ZZBuild` | Build the current file (`zz build <file>`) |
-| `:ZZDoc` | Stdlib help for the word under the cursor (885 signatures) |
-| `:ZZDiag` | Show diagnostics at the cursor line |
+`:ZZRun` `:ZZCheck` `:ZZFmt` `:ZZTest` `:ZZBuild` — act on the current file. `:ZZDoc` shows stdlib help for the word under the cursor. `:ZZDiag` shows line diagnostics.
 
-## Formatting
-
-Format-on-save is enabled by default.  The plugin first tries LSP
-formatting (`textDocument/formatting`), then falls back to shelling
-out to `zz fmt`.
-
-Disable format-on-save:
-
-```lua
-require("zz-lang").setup({
-  format = { on_save = false },
-})
-```
-
-Use `zz fmt` directly (bypass LSP):
-
-```lua
-require("zz-lang").setup({
-  format = { uses_lsp = false },
-})
-```
-
-## Snippets
-
-Available snippet triggers (use Tab or your snippet engine):
-
-| Trigger | Expansion |
-|---|---|
-| `func` | `func name(params) -> ret { body }` |
-| `funcnr` | `func name(params) { body }` (no return) |
-| `struct` | `struct Name { field: type }` |
-| `if` | `if condition { body }` |
-| `ife` | `if condition { } else { }` |
-| `iflet` | `if let .some(x) = value { } else { }` |
-| `for` | `for item in iterable { body }` |
-| `forr` | `for i in 0..n { body }` |
-| `while` | `while condition { body }` |
-| `match` | `match expr { .variant(v) => body }` |
-| `import` | `import std.module` |
-| `defer` | `defer expr` |
-| `ret` | `return expr` |
-| `\|` | `\|args\| expr` (closure) |
-| `dict` | `{ key: value }` |
-
-Snippets work automatically with [luasnip](https://github.com/L3MON4D3/LuaSnip)
-if installed.  Otherwise, a basic keymap fallback is provided.
-
-## Statusline
-
-The plugin includes an opt-in statusline component.  Enable it:
-
-```lua
-require("zz-lang").setup({ statusline = { enabled = true } })
-```
-
-### lualine.nvim integration
-
-```lua
-require("lualine").setup({
-  sections = {
-    lualine_x = { require("zz-lang.statusline").lualine_component() },
-  },
-})
-```
-
-The component shows:
-- `ZZ` when the language server is connected
-- `ZZ(-)` when disconnected
-- `E:3 W:1` with error/warning counts
-- Color turns red on errors
-
-## How It Works
-
-This plugin uses Neovim's built-in LSP client (`vim.lsp.start()`) to
-communicate with `zz-lsp`.  No `nvim-lspconfig` or other plugin
-dependencies are required.
-
-The plugin handles:
-1. **Filetype detection** — `*.zz` files are detected automatically
-2. **Syntax highlighting** — Vim regex-based highlighting for all ZZ constructs
-3. **LSP client** — Auto-starts and attaches `zz-lsp` to `.zz` buffers
-4. **Keymaps** — Standard LSP keymaps (gd, gr, K, etc.)
-5. **Formatting** — Format-on-save via LSP or `zz fmt`
-6. **Commands** — `:ZZRun`, `:ZZCheck`, `:ZZFmt`
-
-## Troubleshooting
-
-### LSP not starting
-
-Make sure `zz-lsp` is in your `$PATH`:
-
-```bash
-which zz-lsp
-```
-
-### Debug logging
-
-Set the `RUST_LOG` environment variable before starting Neovim:
-
-```bash
-RUST_LOG=debug nvim
-```
-
-Or in your shell config:
-
-```lua
--- In init.lua, before require("zz-lang").setup():
-vim.env.RUST_LOG = "zz_lsp=debug"
-```
-
-### Check LSP status
-
-```lua
-:lua print(vim.inspect(vim.lsp.get_clients({ name = "zz-lsp" })))
-```
+Snippets (`func`, `match`, `httproute`, …) register with luasnip/cmp automatically, omnifunc otherwise. `gf` follows `import`s.
 
 ## License
 
