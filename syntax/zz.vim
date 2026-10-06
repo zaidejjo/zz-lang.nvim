@@ -1,4 +1,4 @@
-" zz-lang.nvim — syntax highlighting for ZZ
+" nvim-zz — syntax highlighting for ZZ
 "
 " Generated from the authoritative lexer:
 "   crates/zz_frontend/src/token.rs + crates/zz_frontend/src/lexer/mod.rs

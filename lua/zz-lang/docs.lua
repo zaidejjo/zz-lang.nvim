@@ -1,4 +1,4 @@
--- zz-lang.nvim — stdlib signature + doc database
+-- nvim-zz — stdlib signature + doc database
 --
 -- GENERATED from zz_lang/crates/zz_stdlib/src/funcs.rs
 -- (regenerate: extentions/scripts/gen_zzdocs.py + gen_docs.py).

@@ -1,4 +1,4 @@
--- zz-lang.nvim — per-buffer settings for ZZ files
+-- nvim-zz — per-buffer settings for ZZ files
 
 if vim.b.did_zz_ftplugin then
   return

@@ -1,9 +1,9 @@
--- zz-lang.nvim — :checkhealth report
+-- nvim-zz — :checkhealth report
 
 local M = {}
 
 function M.check()
-  vim.health.start("zz-lang.nvim")
+  vim.health.start("nvim-zz")
 
   -- Neovim version (0.8+ for vim.lsp.start, 0.10+ for inlay hints/snippet)
   if vim.fn.has("nvim-0.10") == 1 then

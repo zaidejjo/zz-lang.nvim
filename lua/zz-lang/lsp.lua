@@ -1,4 +1,4 @@
--- zz-lang.nvim — LSP client setup via vim.lsp
+-- nvim-zz — LSP client setup via vim.lsp
 --
 -- Uses vim.lsp.start() (Neovim 0.8+) for a built-in, zero-dependency
 -- language server connection.  No nvim-lspconfig required.

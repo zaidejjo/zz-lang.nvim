@@ -1,4 +1,4 @@
--- zz-lang.nvim — user commands
+-- nvim-zz — user commands
 --
 -- :ZZRun    — run current file with `zz run`
 -- :ZZCheck  — type-check current file with `zz check`

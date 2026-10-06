@@ -1,4 +1,4 @@
-" zz-lang.nvim — filetype detection for ZZ
+" nvim-zz — filetype detection for ZZ
 
 autocmd BufRead,BufNewFile *.zz setfiletype zz
 autocmd BufRead,BufNewFile *.zz setlocal comments=://,:///,://!,:/*

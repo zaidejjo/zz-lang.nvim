@@ -1,4 +1,4 @@
-; zz-lang.nvim — tree-sitter indents for ZZ
+; nvim-zz — tree-sitter indents for ZZ
 
 ; Indent blocks one level
 [

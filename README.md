@@ -1,4 +1,4 @@
-# zz-lang.nvim
+# nvim-zz
 
 All-in-one Neovim plugin for the [ZZ programming language](https://github.com/zz-language/zz).
 
@@ -24,7 +24,7 @@ Docs: <https://zz-lang.pages.dev>. Zero external plugin dependencies.  Uses Neov
 | **Tree-sitter queries** | `queries/zz/` highlights/folds/indents for the tree-sitter-zz parser |
 | **Snippets** | Code snippets for common ZZ constructs (incl. HTTP routes/responses) |
 | **Completion** | ~450-entry stdlib dictionary + luasnip/cmp omnifunc fallback |
-| **Health check** | `:checkhealth zz-lang` verifies CLI, LSP, engines, parser |
+| **Health check** | `:checkhealth nvim-zz` verifies CLI, LSP, engines, parser |
 | **Statusline** | Lualine component showing LSP status |
 | **CLI commands** | `:ZZRun`, `:ZZCheck`, `:ZZFmt`, `:ZZTest`, `:ZZBuild`, `:ZZDiag` |
 | **Import navigation** | `gf` resolves `import std.x` (with `ZZ_ROOT`) and relative imports |
@@ -48,7 +48,7 @@ sudo cp target/release/zz-lsp /usr/local/bin/
 
 ```lua
 {
-  "zaidejjo/zz-lang.nvim",
+  "zz-language/nvim-zz",
   ft = "zz",
   config = function()
     require("zz-lang").setup({
@@ -62,7 +62,7 @@ sudo cp target/release/zz-lsp /usr/local/bin/
 
 ```lua
 use {
-  "zaidejjo/zz-lang.nvim",
+  "zz-language/nvim-zz",
   ft = "zz",
   config = function()
     require("zz-lang").setup()
@@ -73,7 +73,7 @@ use {
 ### vim-plug
 
 ```vim
-Plug 'zaidejjo/zz-lang.nvim'
+Plug 'zz-language/nvim-zz'
 
 autocmd FileType zz lua require("zz-lang").setup()
 ```
@@ -83,8 +83,8 @@ autocmd FileType zz lua require("zz-lang").setup()
 Clone into your Neovim plugin directory:
 
 ```bash
-git clone https://github.com/zaidejjo/zz-lang.nvim \
-  ~/.local/share/nvim/site/pack/plugins/start/zz-lang.nvim
+git clone https://github.com/zz-language/nvim-zz \
+  ~/.local/share/nvim/site/pack/plugins/start/nvim-zz
 ```
 
 Then add to your `init.lua`:

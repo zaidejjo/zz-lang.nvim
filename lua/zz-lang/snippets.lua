@@ -1,4 +1,4 @@
--- zz-lang.nvim — snippet definitions and completion dictionary
+-- nvim-zz — snippet definitions and completion dictionary
 --
 -- ZZ-specific snippets: works with Neovim's built-in snippet engine
 -- (vim.snippet on 0.10+), luasnip, or a basic keymap fallback.

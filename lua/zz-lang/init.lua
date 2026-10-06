@@ -1,4 +1,4 @@
--- zz-lang.nvim — plugin entry point
+-- nvim-zz — plugin entry point
 --
 -- Usage:
 --   require("zz-lang").setup({ lsp = { enabled = true } })

@@ -1,4 +1,4 @@
--- zz-lang.nvim — statusline / lualine integration
+-- nvim-zz — statusline / lualine integration
 --
 -- Provides a lightweight statusline component that shows ZZ LSP status.
 -- Works with lualine.nvim or any statusline that accepts a function.

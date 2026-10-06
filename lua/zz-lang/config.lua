@@ -1,4 +1,4 @@
--- zz-lang.nvim — default configuration
+-- nvim-zz — default configuration
 
 local M = {}
 

@@ -1,4 +1,4 @@
-; zz-lang.nvim — tree-sitter folds for ZZ
+; nvim-zz — tree-sitter folds for ZZ
 
 [
   (function_definition)

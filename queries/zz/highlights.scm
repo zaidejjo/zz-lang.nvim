@@ -1,4 +1,4 @@
-; zz-lang.nvim — tree-sitter highlights for ZZ
+; nvim-zz — tree-sitter highlights for ZZ
 ; Requires the tree-sitter-zz parser (../tree-sitter-zz).
 
 ; ── Keywords ──
