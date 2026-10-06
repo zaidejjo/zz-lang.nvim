@@ -437,7 +437,7 @@ M.keywords = {
   -- Keywords (all 21 — exactly the lexer's set)
   "import", "as", "func", "return", "if", "else", "while", "match",
   "struct", "for", "in", "break", "continue", "defer",
-  "pub", "impl", "const", "extern", "mut",
+  "pub", "impl", "const", "extern",
 
   -- Booleans
   "true", "false",

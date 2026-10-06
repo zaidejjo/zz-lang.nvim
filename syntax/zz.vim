@@ -21,7 +21,7 @@ syn keyword zzTodo TODO FIXME NOTE HACK XXX BUG contained
 syn keyword zzKeyword
       \ import as func return if else while match
       \ struct for in break continue defer
-      \ pub impl const extern mut
+      \ pub impl const extern
 
 syn keyword zzBoolean true false
 

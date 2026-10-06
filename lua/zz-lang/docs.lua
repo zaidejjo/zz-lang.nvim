@@ -1,7 +1,7 @@
 -- zz-lang.nvim — stdlib signature + doc database
 --
 -- GENERATED from zz_lang/crates/zz_stdlib/src/funcs.rs
--- (extentions: generator in /tmp/opencode — rerun on stdlib changes).
+-- (regenerate: extentions/scripts/gen_zzdocs.py + gen_docs.py).
 --
 -- Powers :ZZDoc, K fallback hover, and omnifunc detail text.
 

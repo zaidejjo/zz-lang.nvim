@@ -4,16 +4,18 @@
 ; ── Keywords ──
 [
   "import" "as" "func" "return" "if" "else" "while" "match"
-  "struct" "for" "in" "break" "continue" "defer"
-  "pub" "impl" "const" "extern" "mut"
+  "struct" "for" "in" "defer"
+  "pub" "impl" "const" "extern"
 ] @keyword
+
+(break_statement) @keyword
+(continue_statement) @keyword
 
 "true" @boolean
 "false" @boolean
 
 ; ── Types ──
 (primitive_type) @type
-(generic_type name: (type_identifier) @type)
 (named_type name: (type_identifier) @type)
 
 ; ── Functions / structs / consts ──
@@ -36,6 +38,9 @@
 ; ── Literals ──
 (string) @string
 (triple_string) @string
+(string_content) @string
+(brace_content) @string
+(rbrace) @string
 (escape_sequence) @string.escape
 (interpolation) @none
 (interpolation "{") @punctuation.special
@@ -67,9 +72,3 @@
   (line_comment) @comment.documentation
   (#match? @comment.documentation "^///")
 )
-"TODO" @todo
-"FIXME" @todo
-"NOTE" @todo
-"HACK" @todo
-"XXX" @todo
-"BUG" @todo
