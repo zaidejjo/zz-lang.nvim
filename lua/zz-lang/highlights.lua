@@ -1,44 +1,50 @@
 -- nvim-zz — highlight palette
 --
--- Gives every ZZ category its own color instead of inheriting one
--- purple `Function` group for everything:
+-- Theme-first colors: every ZZ group links to a standard theme group, so
+-- any colorscheme instantly gives a coherent, distinct look with zero
+-- hardcoded hexes:
 --
---   modules/namespaces ..... teal      (zzModule, @lsp.type.namespace)
---   functions/methods ...... blue      (zzFuncName, @lsp.type.function/.method)
---   builtins (println…) ..... yellow   (zzBuiltin)
---   types/structs .......... green     (zzType*, zzStructName, @lsp.type.*)
---   consts/variants ........ orange    (zzConstName, zzVariant)
---   parameters ............. red italic(zzParam via @lsp.type.parameter)
+--   modules/namespaces ..... Include     (zzModule, @lsp.type.namespace)
+--   functions/methods ...... Function    (zzFuncName, zzStdFunc, @lsp.type.function/.method)
+--   builtins (println…) ..... Special     (zzBuiltin)
+--   types/structs .......... Type        (zzType*, zzStructName, @lsp.type.struct/.type)
+--   consts/variants ........ Constant    (zzConstName, zzVariant)
+--   parameters ............. Special     (@lsp.type.parameter)
+--   variables .............. Identifier  (@lsp.type.variable)
+--   decorators ............. PreProc     (zzDecorator)
 --
--- Strings, numbers, keywords and comments keep the colorscheme's own
--- groups. Disable with `highlight = { palette = false }` (plain
--- colorscheme links), override single colors with
--- `highlight = { colors = { ZzModule = { fg = "#ff0000" } } }`.
+-- Server semantic tokens link back to the same zz groups, so regex and
+-- compiler-driven colors always agree — one group to tweak per category.
+--
+-- Change a single color (replaces that group's link):
+--   highlight = { colors = { zzModule = { fg = "#ff0000" } } }
+-- Disable everything (plain syntax defaults):
+--   highlight = { palette = false }
 
 local M = {}
 
----Default palette: highlight group → definition.
+---Default palette: highlight group → link target.
 M.defaults = {
   -- Regex syntax groups.
-  zzModule = { fg = "#56B6C2" },
-  zzFuncName = { fg = "#61AFEF" },
-  zzBuiltin = { fg = "#E5C07B" },
-  zzStdFunc = { fg = "#61AFEF" },
-  zzType = { fg = "#98C379" },
-  zzTypeBuiltin = { fg = "#98C379" },
-  zzStructName = { fg = "#98C379" },
-  zzConstName = { fg = "#D19A66" },
-  zzVariant = { fg = "#D19A66" },
-  zzDecorator = { fg = "#5C6370" },
-  -- Server semantic tokens (0.10+).
-  ["@lsp.type.namespace"] = { fg = "#56B6C2" },
-  ["@lsp.type.function"] = { fg = "#61AFEF" },
-  ["@lsp.type.method"] = { fg = "#61AFEF" },
-  ["@lsp.type.struct"] = { fg = "#98C379" },
-  ["@lsp.type.type"] = { fg = "#98C379" },
-  ["@lsp.type.parameter"] = { fg = "#E06C75", italic = true },
-  ["@lsp.type.decorator"] = { fg = "#5C6370" },
-  ["@lsp.type.variable"] = { fg = "#A9B1D6" },
+  zzModule = { link = "Include" },
+  zzFuncName = { link = "Function" },
+  zzBuiltin = { link = "Special" },
+  zzStdFunc = { link = "Function" },
+  zzType = { link = "Type" },
+  zzTypeBuiltin = { link = "Type" },
+  zzStructName = { link = "Type" },
+  zzConstName = { link = "Constant" },
+  zzVariant = { link = "Constant" },
+  zzDecorator = { link = "PreProc" },
+  -- Server semantic tokens (0.10+): follow the zz groups above.
+  ["@lsp.type.namespace"] = { link = "zzModule" },
+  ["@lsp.type.function"] = { link = "zzFuncName" },
+  ["@lsp.type.method"] = { link = "zzFuncName" },
+  ["@lsp.type.struct"] = { link = "zzStructName" },
+  ["@lsp.type.type"] = { link = "zzType" },
+  ["@lsp.type.parameter"] = { link = "Special" },
+  ["@lsp.type.variable"] = { link = "Identifier" },
+  ["@lsp.type.decorator"] = { link = "zzDecorator" },
 }
 
 ---Plain colorscheme links used when the palette is disabled.
@@ -55,7 +61,7 @@ M.links = {
   zzDecorator = "PreProc",
 }
 
----Apply highlight groups from a color table.
+---Apply highlight groups from a spec table.
 ---@param colors table<string, table>
 local function apply(colors)
   for group, spec in pairs(colors) do

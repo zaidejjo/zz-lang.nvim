@@ -8,8 +8,15 @@ Neovim >= 0.8, plus the `zz` CLI and `zz-lsp` binary in `$PATH`:
 
 ```bash
 cargo install --path crates/zz_cli
-cargo build --release -p zz_lsp && sudo cp target/release/zz-lsp /usr/local/bin/
+cargo build --release -p zz_lsp && mkdir -p ~/.zz/bin && \
+  cp target/release/zz-lsp ~/.zz/bin/zz-lsp.new && \
+  mv ~/.zz/bin/zz-lsp.new ~/.zz/bin/zz-lsp
 ```
+
+(`mv` over rename, never `cp` onto the old file: copying onto a
+running binary fails with ETXTBSY. Make sure `~/.zz/bin` is in
+`$PATH` — and that no older `zz-lsp` in `/usr/local/bin` shadows it;
+`:checkhealth nvim-zz` prints the exact binary Neovim spawns.)
 
 ## Install
 
@@ -78,11 +85,14 @@ Three layers, each enhancing the last:
 
 Cursor reference highlighting follows `highlight.references`.
 
-Colors come from the built-in palette (`highlight.palette`, on by
-default): modules teal, functions blue, builtins yellow, types green,
-consts orange, parameters red italic. Override groups with
-`highlight = { colors = { zzModule = { fg = "#ff0000" } } }`, or set
-`highlight = { palette = false }` for plain colorscheme links.
+Colors come from your colorscheme, not hardcoded hexes: every `zz*`
+group links to a standard theme group (modules → `Include`,
+functions → `Function`, builtins → `Special`, types → `Type`,
+consts → `Constant`, variables → `Identifier`), and server semantic
+tokens follow the same groups — one tweak per category. Override a
+single group with `highlight = { colors = { zzModule = { fg =
+"#ff0000" } } }`, or set `highlight = { palette = false }` for plain
+syntax defaults.
 
 ## Troubleshooting
 
@@ -128,13 +138,14 @@ require("zz-lang").setup({
 | Key | Action |
 |---|---|
 | `gd` / `gr` / `K` | Definition / references / hover (`K` falls back to stdlib docs) |
-| `<leader>rn` / `<leader>ca` | Rename / code action |
+| `<leader>rn` / `<leader>ca` | Rename / code action (quickfixes: remove unused import, apply suggestions; visual mode supported) |
 | `<leader>f` | Format buffer |
+| `<leader>th` | Toggle inlay hints (inferred `:=` types, arg names) |
 | `]d` / `[d` | Next / previous diagnostic |
 
 ## Commands
 
-`:ZZRun` `:ZZCheck` `:ZZFmt` `:ZZTest` `:ZZBuild` — act on the current file. `:ZZDoc` shows stdlib help for the word under the cursor. `:ZZDiag` shows line diagnostics.
+`:ZZRun` `:ZZCheck` `:ZZFmt` `:ZZTest` `:ZZBuild` — act on the current file. `:ZZDoc` shows stdlib help for the word under the cursor. `:ZZDiag` shows line diagnostics. `:ZZUpdateServer` rebuilds `zz-lsp` from your zz_lang checkout (auto-detected via `lsp.source_dir`, `$ZZ_LANG_ROOT`, or `~/Projects/zz_lang`), installs it where Neovim actually spawns it from, and restarts the client — run it whenever diagnostics look stale after a compiler update.
 
 Snippets (`func`, `match`, `httproute`, …) register with luasnip/cmp automatically, omnifunc otherwise. `gf` follows `import`s.
 

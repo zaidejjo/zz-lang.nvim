@@ -24,6 +24,8 @@ function M.check()
 
   -- zz-lsp server (+ version match against the CLI)
   if vim.fn.executable("zz-lsp") == 1 then
+    local exe = vim.fn.exepath("zz-lsp")
+    vim.health.info("zz-lsp spawns from: " .. exe .. " (if this is /usr/local/bin, a stale copy may shadow ~/.zz/bin)")
     local lsp_out = vim.fn.systemlist("zz-lsp --version")
     local lsp_ver = (lsp_out[1] or ""):match("(%d+%.%d+%.%d+)")
     if lsp_ver then

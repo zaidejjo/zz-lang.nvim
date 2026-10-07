@@ -17,6 +17,8 @@ function M.setup(opts)
   -- 1. Start LSP
   if M.config.lsp.enabled then
     require("zz-lang.lsp").start(M.config)
+    -- A stale server paints phantom diagnostics; surface drift at once.
+    require("zz-lang.update").check_drift()
   end
 
   -- 2. Register user commands

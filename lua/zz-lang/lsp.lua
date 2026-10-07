@@ -60,6 +60,7 @@ local function setup_keymaps(bufnr)
   end, "hover documentation / stdlib docs")
   map("n", "<leader>rn", vim.lsp.buf.rename, "rename symbol")
   map("n", "<leader>ca", vim.lsp.buf.code_action, "code action")
+  map("v", "<leader>ca", vim.lsp.buf.code_action, "code action")
   map("n", "<C-k>", vim.lsp.buf.signature_help, "signature help")
   map("i", "<C-k>", vim.lsp.buf.signature_help, "signature help")
   -- Manual completion: works with LSP (omnifunc) or the dict fallback.
@@ -238,8 +239,11 @@ function M.start(config)
       vim.lsp.buf_attach_client(0, client_id)
     end
 
-    -- Auto-attach when a .zz file is opened.
+    -- Auto-attach when a .zz file is opened (grouped so
+    -- :ZZUpdateServer restarts never stack duplicate autocmds).
+    local attach_group = vim.api.nvim_create_augroup("zz_lang_lsp_attach", { clear = true })
     vim.api.nvim_create_autocmd("FileType", {
+      group = attach_group,
       pattern = "zz",
       callback = function(ev)
         if client_id then
