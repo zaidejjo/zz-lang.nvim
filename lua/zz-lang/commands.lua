@@ -99,6 +99,12 @@ function M.register(config)
     end, { desc = "ZZ: stdlib help for word under cursor" })
   end
 
+  if config.commands.ZZUpdateServer then
+    vim.api.nvim_create_user_command("ZZUpdateServer", function()
+      require("zz-lang.update").update(config)
+    end, { desc = "ZZ: rebuild zz-lsp from source, install, restart" })
+  end
+
   -- Always register diagnostic navigation
   vim.api.nvim_create_user_command("ZZDiag", function()
     vim.diagnostic.open_float(0, { scope = "line" })

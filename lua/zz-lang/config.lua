@@ -9,6 +9,8 @@ local M = {}
 ---@field capabilities table|nil
 ---@field on_attach fun(client: table, bufnr: integer)|nil
 ---@field inlay_hints boolean Enable inlay hints when the server offers them
+---@field source_dir string|nil zz_lang checkout for :ZZUpdateServer (default: $ZZ_LANG_ROOT or ~/Projects/zz_lang)
+---@field install_dir string|nil where :ZZUpdateServer installs zz-lsp (default: dir of the zz-lsp in $PATH)
 
 ---@class ZzConfigFormat
 ---@field on_save boolean
@@ -21,6 +23,7 @@ local M = {}
 ---@field ZZTest boolean
 ---@field ZZBuild boolean
 ---@field ZZDoc boolean
+---@field ZZUpdateServer boolean
 
 ---@class ZzConfigSnippets
 ---@field enabled boolean
@@ -50,6 +53,8 @@ M.defaults = {
     capabilities = nil,
     on_attach = nil,
     inlay_hints = true,
+    source_dir = nil,
+    install_dir = nil,
   },
 
   format = {
@@ -64,6 +69,7 @@ M.defaults = {
     ZZTest = true,
     ZZBuild = true,
     ZZDoc = true,
+    ZZUpdateServer = true,
   },
 
   snippets = {
